@@ -65,13 +65,23 @@ class UseImmediateParentNameExtension(ExtensionBase):
                     rig_object = bpy.data.objects.get(object_name)
                     import_path = self.get_full_import_path(rig_object, properties, UnrealTypes.SKELETAL_MESH)
 
-                    parent_object = rig_object.parent
-                    if parent_object and parent_object.type == 'EMPTY':
-                        asset_name = parent_object.name
+                    # if a skeleton name override is provided
+                    UESkeletonAssetNameOverride = ""
+                    if "UESkeletonAssetNameOverride" in rig_object:
+                        UESkeletonAssetNameOverride = rig_object.get("UESkeletonAssetNameOverride", "")
+
+                    if UESkeletonAssetNameOverride != "":
+                        Skeleton_asset_path = f'{import_path}{UESkeletonAssetNameOverride}'
+                        print(f'pre_import {rig_object} to UE using SkeletonPathOverride={Skeleton_asset_path}')
                     else:
-                        asset_name = self.get_parent_collection_name(object_name, properties)
+                        parent_object = rig_object.parent
+                        if parent_object and parent_object.type == 'EMPTY':
+                            asset_name = parent_object.name
+                        else:
+                            asset_name = self.get_parent_collection_name(object_name, properties)
+                        Skeleton_asset_path = f'{import_path}{asset_name}_Skeleton'
                     self.update_asset_data({
-                        'skeleton_asset_path': f'{import_path}{asset_name}_Skeleton',
+                        'skeleton_asset_path': Skeleton_asset_path,
                     })
             elif asset_type:
                 object_name = asset_data.get('_mesh_object_name')

@@ -444,6 +444,16 @@ def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import
     :param callable get_path_function: A function that gets the import path.
     :return str: The game path to the unreal skeleton asset.
     """
+
+    # if a skeleton name override is provided
+    if "UESkeletonAssetNameOverride" in rig_object:
+        UESkeletonAssetNameOverride = rig_object.get("UESkeletonAssetNameOverride", "")
+        if UESkeletonAssetNameOverride != "":
+            import_path = get_path_function(properties, UnrealTypes.SKELETAL_MESH, *args, **kwargs)
+            result = f'{import_path}{UESkeletonAssetNameOverride}'
+            print(f'Exporting {rig_object} to UE using SkeletonPathOverride={result}')
+            return result
+
     # if a skeleton path is provided
     if properties.unreal_skeleton_asset_path:
         return properties.unreal_skeleton_asset_path
